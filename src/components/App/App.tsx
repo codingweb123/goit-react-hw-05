@@ -16,6 +16,7 @@ import type { InitialValues } from "../NoteForm/NoteForm"
 import type { FormikHelpers } from "formik"
 import toast, { Toaster } from "react-hot-toast"
 import { Loading } from "notiflix/build/notiflix-loading-aio"
+import NoteForm from "../NoteForm/NoteForm"
 
 export default function App() {
 	const [query, setQuery] = useState<string>("")
@@ -104,7 +105,12 @@ export default function App() {
 				<NoteList notes={notes.notes} onDelete={onDelete} />
 			)}
 			{isModalOpen && (
-				<Modal onClose={() => setIsModalOpen(false)} onSubmit={formSubmit} />
+				<Modal onClose={() => setIsModalOpen(false)}>
+					<NoteForm
+						onClose={() => setIsModalOpen(false)}
+						onSubmit={formSubmit}
+					/>
+				</Modal>
 			)}
 		</div>
 	)

@@ -1,18 +1,13 @@
 import { createPortal } from "react-dom"
 import css from "./Modal.module.css"
 import { useEffect } from "react"
-import NoteForm, { type InitialValues } from "../NoteForm/NoteForm"
-import type { FormikHelpers } from "formik"
 
 interface ModalProps {
+	children: React.ReactNode
 	onClose: () => void
-	onSubmit: (
-		values: InitialValues,
-		actions: FormikHelpers<InitialValues>
-	) => void
 }
 
-export default function Modal({ onClose, onSubmit }: ModalProps) {
+export default function Modal({ children, onClose }: ModalProps) {
 	const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (e.target === e.currentTarget) {
 			onClose()
@@ -40,9 +35,7 @@ export default function Modal({ onClose, onSubmit }: ModalProps) {
 			role="dialog"
 			aria-modal="true"
 			onClick={handleBackdrop}>
-			<div className={css.modal}>
-				<NoteForm onClose={onClose} onSubmit={onSubmit} />
-			</div>
+			<div className={css.modal}>{children}</div>
 		</div>,
 		document.body
 	)
