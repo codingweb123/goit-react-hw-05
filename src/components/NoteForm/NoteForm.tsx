@@ -1,13 +1,16 @@
 import { Formik, Form, ErrorMessage, type FormikHelpers, Field } from "formik"
 import css from "./NoteForm.module.css"
 import * as Yup from "yup"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { createNote } from "../../services/noteService"
+import { Loading } from "notiflix"
+import toast from "react-hot-toast"
 
 interface NoteFormProps {
-	onSubmit: (
-		values: InitialValues,
-		actions: FormikHelpers<InitialValues>
-	) => void
-	onClose: () => void
+	query: string
+	page: number
+	onSubmit: () => void
+	onCancel: () => void
 }
 
 const formTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"] as const
@@ -36,11 +39,36 @@ const initialValues: InitialValues = {
 	tag: "Todo",
 }
 
-export default function NoteForm({ onSubmit, onClose }: NoteFormProps) {
+export default function NoteForm({ query, page, onSubmit, onCancel }: NoteFormProps) {
+	const queryClient = useQueryClient()
+	const noteCreation = useMutation({
+		mutationFn: async ({ title, content, tag }: InitialValues) => {
+			const data = await createNote(title, content, tag)
+			return data
+		},
+		onSuccess: () => {
+			Loading.remove()
+			toast.success("Note has been successfully created!")
+			queryClient.invalidateQueries({ queryKey: ["notes", query, page] })
+		},
+		onError: () => {
+			Loading.remove()
+			toast.error("Error occured while creating note!")
+		},
+	})
+	const onFormSubmit = (
+		values: InitialValues,
+		actions: FormikHelpers<InitialValues>
+	) => {
+		Loading.hourglass()
+		onSubmit()
+		noteCreation.mutate(values)
+		actions.resetForm()
+	}
 	return (
 		<Formik
 			initialValues={initialValues}
-			onSubmit={onSubmit}
+			onSubmit={onFormSubmit}
 			validationSchema={formScheme}>
 			<Form className={css.form}>
 				<div className={css.formGroup}>
@@ -74,7 +102,7 @@ export default function NoteForm({ onSubmit, onClose }: NoteFormProps) {
 				</div>
 
 				<div className={css.actions}>
-					<button type="button" className={css.cancelButton} onClick={onClose}>
+					<button type="button" className={css.cancelButton} onClick={onCancel}>
 						Cancel
 					</button>
 					<button type="submit" className={css.submitButton}>
