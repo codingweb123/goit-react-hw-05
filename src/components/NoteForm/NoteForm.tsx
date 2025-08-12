@@ -39,7 +39,12 @@ const initialValues: InitialValues = {
 	tag: "Todo",
 }
 
-export default function NoteForm({ query, page, onSubmit, onCancel }: NoteFormProps) {
+export default function NoteForm({
+	query,
+	page,
+	onSubmit,
+	onCancel,
+}: NoteFormProps) {
 	const queryClient = useQueryClient()
 	const noteCreation = useMutation({
 		mutationFn: async ({ title, content, tag }: InitialValues) => {
@@ -47,6 +52,7 @@ export default function NoteForm({ query, page, onSubmit, onCancel }: NoteFormPr
 			return data
 		},
 		onSuccess: () => {
+			onSubmit()
 			Loading.remove()
 			toast.success("Note has been successfully created!")
 			queryClient.invalidateQueries({ queryKey: ["notes", query, page] })
@@ -61,7 +67,6 @@ export default function NoteForm({ query, page, onSubmit, onCancel }: NoteFormPr
 		actions: FormikHelpers<InitialValues>
 	) => {
 		Loading.hourglass()
-		onSubmit()
 		noteCreation.mutate(values)
 		actions.resetForm()
 	}
